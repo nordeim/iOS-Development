@@ -46,3 +46,30 @@ zstyle ':completion:*' menu select  # Allow agents to "see" completion menus
 # ---------------------------------------------------------
 alias ccode="claude"
 alias refresh="source ~/.zshrc"
+
+# ---------------------------------------------------------
+# 6. SECURE API KEY MANAGEMENT
+# ---------------------------------------------------------
+
+# Load secrets from local file if it exists
+if [ -f "$HOME/.env.secrets" ]; then
+  # Load keys into the shell without 'export' first to keep them local
+  set -a
+  source "$HOME/.env.secrets"
+  set +a
+fi
+
+# ---------------------------------------------------------
+# 7. AI AGENT "STEALTH MODE" (SECURITY OVERRIDE)
+# ---------------------------------------------------------
+# Detect if we are in an AI agent's subshell and wipe sensitive keys.
+# Most agents set specific env vars like 'CLAUDE_CODE', 'AGENT_MODE', etc.
+
+if [[ -n "$CLAUDE_CODE" || -n "$AI_AGENT" ]]; then
+    # Wipe the keys so the agent cannot "see" them via 'env' command
+    unset ANTHROPIC_API_KEY
+    unset OPENAI_API_KEY
+    unset TAVILY_API_KEY
+    # Optional: Log the protection
+    # echo "[Security] Sensitive API keys cleared for AI session."
+fi
